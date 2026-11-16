@@ -7,7 +7,7 @@ from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.metrics import r2_score, mean_squared_error
 
 # 1. Load dataset
-data = pd.read_csv(r"C:\Users\raunak\Downloads\uber.csv")
+data = pd.read_csv(r"C:\Users\Downloads\uber.csv")
 
 print("Shape:", data.shape)
 
