@@ -1,0 +1,31 @@
+﻿import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+data=pd.read_csv(r"C:\Users\Downloads\Wine dataset.csv")
+
+X = data.iloc[:, 1:]
+y=data.iloc[:,0]
+
+print("Wine Dataset:")
+print(data)
+
+Scaler=StandardScaler()
+
+X=Scaler.fit_transform(X)
+
+pca=PCA(n_components=2)
+x_pca=pca.fit_transform(X)
+
+print("PCA Data:")
+print(x_pca)
+
+print("\n Explained Variance ratio:")
+print(pca.explained_variance_ratio_)
+
+plt.scatter(x_pca[:,0],x_pca[:,1],c=y)
+plt.xlabel("Principal Compenent 1")
+plt.ylabel("Principal Compenent 2")
+plt.title("PCA-Wine Dataset")
+plt.show()
