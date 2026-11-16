@@ -1,0 +1,103 @@
+# Data Aggregation - Retail Sales Performance
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 1. Import Dataset
+data = pd.read_csv(r"C:\Users\Downloads\Superstore.csv",encoding="latin1")
+
+# 2. Explore Dataset
+print("First 5 Rows:")
+print(data.head())
+
+print("\nShape:")
+print(data.shape)
+
+print("\nColumns:")
+print(data.columns)
+
+print("\nData Types:")
+print(data.dtypes)
+
+print("\nMissing Values:")
+print(data.isnull().sum())
+
+
+# 3. Identify Relevant Variables
+# Region, Category and Sales
+
+print("\nRegions:")
+print(data["Region"].unique())
+
+print("\nProduct Categories:")
+print(data["Category"].unique())
+
+
+# 4. Group Sales by Region
+
+region_sales = data.groupby("Region")["Sales"].sum()
+
+print("\nTotal Sales by Region:")
+print(region_sales)
+
+
+# 5. Visualize Sales by Region
+
+region_sales.plot(kind="bar")
+
+plt.xlabel("Region")
+plt.ylabel("Total Sales")
+plt.title("Sales Distribution by Region")
+plt.show()
+
+
+# Pie Chart
+
+region_sales.plot(
+    kind="pie",
+    autopct="%1.1f%%"
+)
+
+plt.title("Sales Distribution by Region")
+plt.ylabel("")
+plt.show()
+
+
+# 6. Identify Top Performing Region
+
+top_region = region_sales.idxmax()
+top_sales = region_sales.max()
+
+print("\nTop Performing Region:", top_region)
+print("Highest Sales:", top_sales)
+
+
+# 7. Group by Region and Category
+
+region_category_sales = data.groupby(
+    ["Region", "Category"]
+)["Sales"].sum()
+
+print("\nSales by Region and Category:")
+print(region_category_sales)
+
+
+# 8. Stacked Bar Plot
+
+region_category_sales.unstack().plot(
+    kind="bar",
+    stacked=True
+)
+
+plt.xlabel("Region")
+plt.ylabel("Total Sales")
+plt.title("Sales by Region and Category")
+plt.legend(title="Category")
+plt.show()
+
+
+
+
+
+
+
