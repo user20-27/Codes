@@ -1,0 +1,123 @@
+# Tic-Tac-Toe using Reinforcement Learning (Q-Learning)
+import random
+
+# 1. Create Environment
+board = [" "] * 9
+
+# Q-table
+Q = {}
+
+# Get state of board
+def get_state(board):
+    return "".join(board)
+
+# 2. Define Tic-Tac-Toe Game
+def show_board(board):
+    print()
+    print(board[0], "|", board[1], "|", board[2])
+    print("--+---+--")
+    print(board[3], "|", board[4], "|", board[5])
+    print("--+---+--")
+    print(board[6], "|", board[7], "|", board[8])
+
+def check_winner(board):
+    wins = [
+        (0,1,2), (3,4,5), (6,7,8),
+        (0,3,6), (1,4,7), (2,5,8),
+        (0,4,8), (2,4,6)
+    ]
+    for a, b, c in wins:
+        if board[a] != " " and board[a] == board[b] == board[c]:
+            return board[a]
+    if " " not in board:
+        return "Draw"
+    return None
+
+
+# 3. Build Reinforcement Learning Model
+def choose_action(board, epsilon=0.1):
+    state = get_state(board)
+    if state not in Q:
+        Q[state] = [0] * 9
+    # Exploration
+    if random.random() < epsilon:
+        available = [i for i in range(9) if board[i] == " "]
+        return random.choice(available)
+    # Exploitation
+    available = [i for i in range(9) if board[i] == " "]
+ return max(available, key=lambda x: Q[state][x])
+
+
+# 4. Train the Model
+def train(episodes=5000):
+    for episode in range(episodes):
+        board = [" "] * 9
+        while True:
+            state = get_state(board)
+            action = choose_action(board)
+            board[action] = "X"
+            result = check_winner(board)
+            if result == "X":
+                Q[state][action] += 1
+                break
+            if result == "Draw":
+                break
+
+            # Random opponent
+            available = [i for i in range(9) if board[i] == " "]
+            opponent = random.choice(available)
+            board[opponent] = "O"
+            result = check_winner(board)
+            if result == "O":
+                Q[state][action] -= 1
+                break
+            if result == "Draw":
+                break
+            new_state = get_state(board)
+            if new_state not in Q:
+                Q[new_state] = [0] * 9
+
+            # Q-learning update
+            Q[state][action] += 0.1 * (
+                0.9 * max(Q[new_state]) - Q[state][action]
+            )
+    print("Training completed!")
+
+
+# 5. Test the Model
+def play_game():
+    board = [" "] * 9
+    print("\nTic-Tac-Toe")
+    print("Positions are:")
+    print("0 | 1 | 2")
+    print("--+---+--")
+    print("3 | 4 | 5")
+    print("--+---+--")
+    print("6 | 7 | 8")
+
+    while True:
+        # AI move
+        action = choose_action(board, epsilon=0)
+        board[action] = "X"
+        show_board(board)
+        result = check_winner(board)
+        if result:
+            print("Result:", result)
+            break
+        # Human move
+        move = int(input("Enter your move (0-8): "))
+
+        if board[move] != " ":
+            print("Invalid move!")
+            continue
+        board[move] = "O"
+        result = check_winner(board)
+        if result:
+            show_board(board)
+            print("Result:", result)
+            break
+
+# Train and test
+train(5000)
+play_game()
+
