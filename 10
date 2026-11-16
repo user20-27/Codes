@@ -1,0 +1,113 @@
+# Data Wrangling on Real Estate Market
+
+import pandas as pd
+import numpy as np
+
+# 1. Import Dataset
+data = pd.read_csv(r"C:\Users\Downloads\house_data.csv")
+
+print("First 5 Rows:")
+print(data.head())
+
+print("\nShape:")
+print(data.shape)
+
+print("\nColumn Names:")
+print(data.columns)
+
+# Clean column names
+data.columns = data.columns.str.strip().str.lower().str.replace(" ", "_")
+
+print("\nCleaned Column Names:")
+print(data.columns)
+
+
+# 2. Handle Missing Values
+print("\nMissing Values:")
+print(data.isnull().sum())
+
+# Remove missing values
+data = data.dropna()
+
+print("\nMissing Values After Cleaning:")
+print(data.isnull().sum())
+
+
+# 3. Data Merging
+# No additional dataset is available, so merging is not required.
+# We continue with the main dataset.
+
+
+# 4. Filter and Subset Data
+
+# Houses with price greater than 500000
+expensive_houses = data[data["price"] > 500000]
+
+print("\nHouses with Price > 500000:")
+print(expensive_houses.head())
+
+# Houses with 3 or more bedrooms
+three_bedroom = data[data["bedrooms"] >= 3]
+
+print("\nHouses with 3 or More Bedrooms:")
+print(three_bedroom.head())
+
+
+# 5. Handle Categorical Variables
+
+# Convert date into datetime
+data["date"] = pd.to_datetime(data["date"])
+
+# Create year column
+data["sale_year"] = data["date"].dt.year
+
+# Convert zipcode into categorical variable
+data["zipcode"] = data["zipcode"].astype(str)
+
+# One-hot encoding for zipcode
+data = pd.get_dummies(data, columns=["zipcode"], drop_first=True)
+
+print("\nData After Encoding:")
+print(data.head())
+
+
+# 6. Aggregation
+
+# Average price by number of bedrooms
+avg_price_bedrooms = data.groupby("bedrooms")["price"].mean()
+
+print("\nAverage Price by Bedrooms:")
+print(avg_price_bedrooms)
+
+# Average price by year
+avg_price_year = data.groupby("sale_year")["price"].mean()
+
+print("\nAverage Price by Year:")
+print(avg_price_year)
+
+
+# 7. Identify and Handle Outliers
+
+# Using IQR method on price
+Q1 = data["price"].quantile(0.25)
+Q3 = data["price"].quantile(0.75)
+
+IQR = Q3 - Q1
+
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+
+print("\nLower Limit:", lower)
+print("Upper Limit:", upper)
+
+# Remove price outliers
+data = data[
+    (data["price"] >= lower) &
+    (data["price"] <= upper)
+]
+
+print("\nShape After Removing Outliers:")
+print(data.shape)
+
+print("\nFinal Dataset:")
+print(data.head())
