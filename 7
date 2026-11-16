@@ -1,0 +1,77 @@
+# Sales Data Analysis using CSV, Excel and JSON
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 1. Load CSV file
+csv_data = pd.read_csv(r"C:\Users\Downloads\Superstore.csv",
+                      encoding="latin1")
+
+# Create Excel and JSON files from the CSV data
+csv_data.to_excel("Superstore.xlsx", index=False)
+csv_data.to_json("Superstore.json", orient="records")
+
+# Load data from all three formats
+csv_data = pd.read_csv(r"C:\Users\Downloads\Superstore.csv",
+                      encoding="latin1")
+excel_data = pd.read_excel("Superstore.xlsx")
+json_data = pd.read_json("Superstore.json")
+
+print("CSV Data:")
+print(csv_data.head())
+
+print("\nExcel Data:")
+print(excel_data.head())
+
+print("\nJSON Data:")
+print(json_data.head())
+
+# 2. Check data
+print("\nNull Values:")
+print(csv_data.isnull().sum())
+
+print("\nDuplicates:")
+print(csv_data.duplicated().sum())
+
+# 3. Data Cleaning
+data = csv_data.dropna()
+data = data.drop_duplicates()
+
+# 4. Data Transformation
+data["Order Date"] = pd.to_datetime(data["Order Date"])
+
+data["Profit %"] = (data["Profit"] / data["Sales"]) * 100
+
+# 5. Data Analysis
+print("\nTotal Sales:", data["Sales"].sum())
+print("Average Sales:", data["Sales"].mean())
+print("Total Profit:", data["Profit"].sum())
+
+print("\nSales by Category:")
+print(data.groupby("Category")["Sales"].sum())
+
+# 6. Visualization
+
+# Bar Chart
+data.groupby("Category")["Sales"].sum().plot(kind="bar")
+
+plt.title("Sales by Category")
+plt.xlabel("Category")
+plt.ylabel("Sales")
+plt.show()
+
+# Pie Chart
+data["Category"].value_counts().plot(
+    kind="pie",
+    autopct="%1.1f%%"
+)
+
+plt.title("Category Distribution")
+plt.ylabel("")
+plt.show()
+
+# Box Plot
+plt.boxplot(data["Sales"])
+
+plt.title("Sales Distribution")
+plt.ylabel("Sales")
+plt.show()
