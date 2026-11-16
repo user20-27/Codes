@@ -1,0 +1,163 @@
+# Weather Data Analysis using OpenWeatherMap API
+
+import requests
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 1. API Key and Cities
+api_key = "b14423e5576dd18f37efd2f22aaeb4ec"
+
+cities = ["Pune", "Mumbai", "Delhi", "Chennai", "Bangalore"]
+
+# 2. Get Weather Data
+weather_data = []
+
+for city in cities:
+
+    url = "https://api.openweathermap.org/data/2.5/weather"
+
+    params = {
+        "q": city,
+        "appid": api_key,
+        "units": "metric"
+    }
+
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    weather = {
+        "City": city,
+        "Temperature": data["main"]["temp"],
+        "Humidity": data["main"]["humidity"],
+        "Wind Speed": data["wind"]["speed"],
+        "Pressure": data["main"]["pressure"],
+        "Precipitation": data.get("rain", {}).get("1h", 0),
+        "Latitude": data["coord"]["lat"],
+        "Longitude": data["coord"]["lon"]
+    }
+
+    weather_data.append(weather)
+
+
+# 3. Create DataFrame
+df = pd.DataFrame(weather_data)
+
+print("Weather Data:")
+print(df)
+
+
+# 4. Check and Clean Data
+print("\nNull Values:")
+print(df.isnull().sum())
+
+df = df.dropna()
+
+
+# 5. Weather Analysis
+print("\nAverage Temperature:",
+      df["Temperature"].mean())
+
+print("Maximum Temperature:",
+      df["Temperature"].max())
+
+print("Minimum Temperature:",
+      df["Temperature"].min())
+
+print("Average Humidity:",
+      df["Humidity"].mean())
+
+print("Average Wind Speed:",
+      df["Wind Speed"].mean())
+
+
+# 6. Temperature Visualization
+plt.bar(df["City"], df["Temperature"])
+plt.xlabel("City")
+plt.ylabel("Temperature (°C)")
+plt.title("Temperature Comparison")
+plt.show()
+
+
+# 7. Humidity Visualization
+plt.bar(df["City"], df["Humidity"])
+plt.xlabel("City")
+plt.ylabel("Humidity (%)")
+plt.title("Humidity Comparison")
+plt.show()
+
+
+# 8. Wind Speed Visualization
+plt.bar(df["City"], df["Wind Speed"])
+plt.xlabel("City")
+plt.ylabel("Wind Speed (m/s)")
+plt.title("Wind Speed Comparison")
+plt.show()
+
+
+# 9. Precipitation Visualization
+plt.bar(df["City"], df["Precipitation"])
+plt.xlabel("City")
+plt.ylabel("Precipitation (mm)")
+plt.title("Precipitation Comparison")
+plt.show()
+
+
+# 10. Correlation
+corr = df[
+    ["Temperature", "Humidity", "Wind Speed"]
+].corr()
+
+print("\nCorrelation:")
+print(corr)
+
+
+# 11. Correlation Heatmap
+plt.imshow(corr, cmap="coolwarm", vmin=-1, vmax=1)
+
+plt.colorbar()
+
+plt.xticks(
+    range(3),
+    ["Temperature", "Humidity", "Wind Speed"]
+)
+
+plt.yticks(
+    range(3),
+    ["Temperature", "Humidity", "Wind Speed"]
+)
+
+# Display values
+for i in range(3):
+    for j in range(3):
+        plt.text(
+            j, i,
+            round(corr.iloc[i, j], 2),
+            ha="center",
+            va="center"
+        )
+
+plt.title("Weather Correlation Heatmap")
+plt.show()
+
+
+# 12. Geographical Visualization
+plt.scatter(
+    df["Longitude"],
+    df["Latitude"],
+    s=100,
+    c=df["Temperature"],
+    cmap="coolwarm"
+)
+
+for i in range(len(df)):
+    plt.text(
+        df["Longitude"].iloc[i],
+        df["Latitude"].iloc[i],
+        df["City"].iloc[i]
+    )
+
+plt.colorbar(label="Temperature (°C)")
+plt.xlabel("Longitude")
+plt.ylabel("Latitude")
+plt.title("Weather Distribution by Location")
+plt.show()
