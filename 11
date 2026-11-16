@@ -1,0 +1,103 @@
+# Data Visualization using Matplotlib
+# Air Quality Index (AQI) Analysis
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 1. Load Dataset
+data = pd.read_csv("city_day.csv")
+
+print("First 5 Rows:")
+print(data.head())
+
+# 2. Explore Dataset
+print("\nShape:", data.shape)
+
+print("\nColumns:")
+print(data.columns)
+
+print("\nNull Values:")
+print(data.isnull().sum())
+
+# 3. Select relevant variables
+data["Date"] = pd.to_datetime(data["Date"])
+
+# Select one city
+data = data[data["City"] == "Delhi"]
+
+# Remove rows where AQI is missing
+data = data.dropna(subset=["AQI"])
+
+# 4. AQI Trend over Time
+plt.figure(figsize=(10, 5))
+
+plt.plot(data["Date"], data["AQI"])
+
+plt.xlabel("Date")
+plt.ylabel("AQI")
+plt.title("AQI Trend Over Time")
+plt.xticks(rotation=45)
+plt.show()
+
+# 5. Pollutant Trends
+
+plt.figure(figsize=(10, 5))
+
+plt.plot(data["Date"], data["PM2.5"], label="PM2.5")
+plt.plot(data["Date"], data["PM10"], label="PM10")
+plt.plot(data["Date"], data["CO"], label="CO")
+
+plt.xlabel("Date")
+plt.ylabel("Pollutant Level")
+plt.title("Pollutant Trends Over Time")
+plt.legend()
+plt.xticks(rotation=45)
+plt.show()
+
+# 6. Bar Plot - AQI by Month
+
+data["Month"] = data["Date"].dt.month
+
+monthly_aqi = data.groupby("Month")["AQI"].mean()
+
+plt.bar(monthly_aqi.index, monthly_aqi.values)
+
+plt.xlabel("Month")
+plt.ylabel("Average AQI")
+plt.title("Average AQI by Month")
+plt.show()
+
+# 7. Box Plot - AQI Distribution
+
+plt.boxplot(data["AQI"])
+
+plt.ylabel("AQI")
+plt.title("AQI Distribution")
+plt.show()
+
+# 8. Scatter Plot - AQI vs PM2.5
+
+plt.scatter(data["PM2.5"], data["AQI"])
+
+plt.xlabel("PM2.5")
+plt.ylabel("AQI")
+plt.title("AQI vs PM2.5")
+plt.show()
+
+# 9. Correlation
+
+print("\nCorrelation:")
+print(data[["PM2.5", "PM10", "CO", "AQI"]].corr())
+
+plt.imshow(
+    data[["PM2.5", "PM10", "CO", "AQI"]].corr(),
+    cmap="coolwarm"
+)
+
+plt.colorbar()
+plt.xticks(range(4), ["PM2.5", "PM10", "CO", "AQI"])
+plt.yticks(range(4), ["PM2.5", "PM10", "CO", "AQI"])
+
+plt.title("AQI and Pollutant Correlation")
+plt.show()
+
