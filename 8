@@ -1,0 +1,87 @@
+# Weather Data Analysis using OpenWeatherMap API
+
+import requests
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 1. API Key and Location
+api_key = "YOUR_API_KEY"
+city = "Pune"
+
+# 2. Get Weather Data from API
+url = "https://api.openweathermap.org/data/2.5/weather"
+
+params = {
+    "q": city,
+    "appid": api_key,
+    "units": "metric"
+}
+
+response = requests.get(url, params=params)
+data = response.json()
+
+print("Weather Data:")
+print(data)
+
+# 3. Extract Weather Information
+weather = {
+    "City": city,
+    "Temperature": data["main"]["temp"],
+    "Humidity": data["main"]["humidity"],
+    "Wind Speed": data["wind"]["speed"],
+    "Pressure": data["main"]["pressure"]
+}
+
+df = pd.DataFrame([weather])
+
+print("\nWeather Information:")
+print(df)
+
+# 4. Check and Clean Data
+print("\nNull Values:")
+print(df.isnull().sum())
+
+df = df.dropna()
+
+# 5. Weather Analysis
+print("\nAverage Temperature:", df["Temperature"].mean())
+print("Maximum Temperature:", df["Temperature"].max())
+print("Minimum Temperature:", df["Temperature"].min())
+print("Average Humidity:", df["Humidity"].mean())
+print("Average Wind Speed:", df["Wind Speed"].mean())
+
+# 6. Visualization
+
+# Temperature
+plt.bar(df["City"], df["Temperature"])
+plt.xlabel("City")
+plt.ylabel("Temperature (°C)")
+plt.title("Temperature")
+plt.show()
+
+# Humidity
+plt.bar(df["City"], df["Humidity"])
+plt.xlabel("City")
+plt.ylabel("Humidity (%)")
+plt.title("Humidity")
+plt.show()
+
+# Wind Speed
+plt.bar(df["City"], df["Wind Speed"])
+plt.xlabel("City")
+plt.ylabel("Wind Speed (m/s)")
+plt.title("Wind Speed")
+plt.show()
+
+# 7. Correlation
+print("\nCorrelation:")
+print(df[["Temperature", "Humidity", "Wind Speed"]].corr())
+
+plt.imshow(df[["Temperature", "Humidity", "Wind Speed"]].corr(),
+           cmap="coolwarm")
+
+plt.colorbar()
+plt.xticks(range(3), ["Temperature", "Humidity", "Wind Speed"])
+plt.yticks(range(3), ["Temperature", "Humidity", "Wind Speed"])
+plt.title("Weather Correlation")
+plt.show()
