@@ -1,0 +1,110 @@
+# Customer Churn Data Cleaning and Preparation
+
+import pandas as pd
+import numpy as np
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# 1. Import Dataset
+data = pd.read_csv("Telco-Customer-Churn.csv")
+
+print("First 5 Rows:")
+print(data.head())
+
+# 2. Explore Dataset
+print("\nShape:", data.shape)
+print("\nColumns:")
+print(data.columns)
+
+print("\nData Types:")
+print(data.dtypes)
+
+# 3. Check Missing Values
+print("\nMissing Values:")
+print(data.isnull().sum())
+
+# Convert TotalCharges to numeric
+data["TotalCharges"] = pd.to_numeric(
+    data["TotalCharges"], errors="coerce"
+)
+
+# Fill missing TotalCharges with 0
+data["TotalCharges"] = data["TotalCharges"].fillna(0)
+
+# 4. Remove Duplicate Records
+print("\nDuplicates:", data.duplicated().sum())
+
+data = data.drop_duplicates()
+
+# 5. Check Inconsistent Data
+print("\nGender Values:")
+print(data["gender"].unique())
+
+print("\nContract Values:")
+print(data["Contract"].unique())
+
+# Standardize text values
+data["gender"] = data["gender"].str.strip().str.title()
+data["Contract"] = data["Contract"].str.strip()
+
+# 6. Correct Data Types
+data["SeniorCitizen"] = data["SeniorCitizen"].astype(int)
+data["tenure"] = data["tenure"].astype(int)
+data["MonthlyCharges"] = data["MonthlyCharges"].astype(float)
+data["TotalCharges"] = data["TotalCharges"].astype(float)
+
+# 7. Handle Outliers
+Q1 = data["MonthlyCharges"].quantile(0.25)
+Q3 = data["MonthlyCharges"].quantile(0.75)
+
+IQR = Q3 - Q1
+
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+
+data = data[
+    (data["MonthlyCharges"] >= lower) &
+    (data["MonthlyCharges"] <= upper)
+]
+
+# 8. Feature Engineering
+data["AverageMonthlySpend"] = (
+    data["TotalCharges"] / data["tenure"].replace(0, 1)
+)
+
+print("\nNew Feature:")
+print(data[["TotalCharges", "tenure",
+            "AverageMonthlySpend"]].head())
+
+# 9. Normalize Numerical Data
+features = [
+    "tenure",
+    "MonthlyCharges",
+    "TotalCharges",
+    "AverageMonthlySpend"
+]
+
+scaler = StandardScaler()
+data[features] = scaler.fit_transform(data[features])
+
+# 10. Split into Training and Testing Data
+X = data.drop(["Churn", "customerID"], axis=1)
+y = data["Churn"]
+
+# Convert Churn into 0 and 1
+y = y.map({"No": 0, "Yes": 1})
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.2,
+    random_state=42
+)
+
+print("\nTraining Data:", X_train.shape)
+print("Testing Data:", X_test.shape)
+
+# 11. Export Cleaned Dataset
+data.to_csv("Cleaned_Telco_Customer_Churn.csv", index=False)
+
+print("\nCleaned dataset exported successfully!")
